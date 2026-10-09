@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Burger Station | كفر الدوار</title>
+<!-- PWA: بيانات التطبيق والأيقونات | manifest + icons -->
+<meta name="theme-color" content="#7a0f18">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<!-- الهيدر | Header -->
+<header>
+  <img src="images/logo.jpg" alt="Burger Station">
+  <h1>Burger Station</h1>
+  <p>أول مطعم برجر متخصص في كفر الدوار · ⭐ 4.8</p>
+  <a class="btn" href="tel:01006446834">📞 01006446834</a><a class="btn" href="tel:01125540746">📞 01125540746</a>
+</header>
+
+<main class="w">
+  <!-- صور | Photos -->
+  <div class="pics">
+    <img src="images/burger-1.jpg" alt="برجر">
+    <img src="images/burger-2.jpg" alt="تشيزي مشروم">
+  </div>
+
+  <!-- المنيو (يُرسم من app.js) | Menu (rendered by app.js) -->
+  <h2 class="bi"><span>المنيو</span><span dir="ltr">Menu</span></h2>
+  <p class="note">اضغط على السعر لإضافة الصنف للسلة 🛒</p>
+  <div class="tabs" id="tabs"></div>
+  <div id="menu"></div>
+
+  <h2 class="bi"><span>زورونا</span><span dir="ltr">Visit Us</span></h2>
+  <div class="box">
+    <p>📍 كفر الدوار، ش. الحدائق، أبراج الحلواني، أمام الكنيسة</p>
+    <p>🕚 من 11 صباحًا حتى 6 صباحًا · 🛵 توصيل · 🥡 سفري</p>
+    <!-- اللوكيشن على خرائط جوجل | Google Maps location -->
+    <a class="btn" href="https://www.google.com/maps/place/burger+station/@31.14526,30.1241231,18z/data=!4m6!3m5!1s0x14f5df79bf4edd29:0x84cd200ed9b3b3fe!8m2!3d31.1452207!4d30.1239854!16s%2Fg%2F11fmrjqh8f?entry=ttu&g_ep=EgoyMDI2MTAwNy4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">📍 افتح اللوكيشن على خرائط جوجل</a>
+  </div>
+</main>
+
+<footer>© Burger Station - كفر الدوار <a class="adm" id="adminLink" href="#admin" title="Admin">⚙</a></footer>
+
+<!-- زر السلة | Cart button -->
+<button id="cartBtn" aria-label="سلة التسوق">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 7H6"/></svg>
+  <span id="count">0</span>
+</button>
+<div class="veil" id="veil"></div>
+
+<!-- درج السلة + بيانات العميل | Cart drawer + customer details -->
+<aside id="drawer" aria-label="سلة الطلبات">
+  <div class="dh"><h2>🛒 سلة الطلبات</h2><button class="x" id="close" aria-label="إغلاق">&times;</button></div>
+  <div id="items"></div>
+  <div class="cust">
+    <input id="custName" placeholder="الاسم (اختياري)" autocomplete="name">
+    <input id="custPhone" type="tel" placeholder="رقم التليفون" autocomplete="tel">
+    <textarea id="custAddr" rows="2" placeholder="العنوان بالتفصيل"></textarea>
+  </div>
+  <div class="sum">
+    <div class="tot"><span>الإجمالي</span><span id="total">0</span></div>
+    <button class="chk" id="checkout">إرسال الطلب</button>
+  </div>
+</aside>
+<div id="toast"></div>
+
+<script src="js/menu-data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/pwa.js"></script>
+</body>
+</html>

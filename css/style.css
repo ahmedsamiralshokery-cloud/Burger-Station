@@ -1,0 +1,66 @@
+/* =====================================================
+   style.css — تنسيق موقع Burger Station | Site styles
+   الأقسام: الأساسيات، الهيدر، المنيو، السلة، الإدارة
+   Sections: base, header, menu, cart, admin
+   ===================================================== */
+:root{--bg:#1a0c0c;--card:#2a1414;--fg:#fff4e6;--muted:#c9a99a;--red:#c1121f;--gold:#ffc300;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:Tahoma,"Segoe UI",Arial,sans-serif;line-height:1.7}
+.w{max-width:820px;margin:0 auto;padding:0 18px}
+header{background:linear-gradient(#7a0f18,#4a0a10);text-align:center;padding:34px 18px 30px}
+header img{width:110px;border-radius:14px}
+h1{margin:10px 0 0;color:var(--gold);font-size:clamp(2rem,8vw,3.2rem)}
+header p{margin:4px 0 18px}
+.btn{display:inline-block;background:var(--gold);color:#2a1414;font-weight:700;text-decoration:none;padding:11px 22px;border-radius:999px;margin:4px}
+.pics{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:22px 0}
+.pics img{width:100%;height:240px;object-fit:cover;border-radius:14px}
+h2{color:var(--gold);margin:28px 0 10px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.tabs button{background:var(--card);color:var(--fg);border:1px solid var(--red);padding:9px 18px;border-radius:999px;font:inherit;cursor:pointer}
+.tabs button.on{background:var(--red)}
+.hd{color:var(--gold);margin:18px 0 6px;font-weight:700}
+.row{display:flex;justify-content:space-between;gap:10px;padding:9px 12px;background:var(--card);border-radius:10px;margin-bottom:6px}
+.row span:first-child{flex:1}.p{width:60px;text-align:center;font-style:normal}.hdr{background:none;color:var(--muted);font-size:.9rem;padding-bottom:0}.row b{color:var(--gold);white-space:nowrap;min-width:56px;text-align:center}.hdr{background:none;color:var(--muted);padding-bottom:0}.hdr b{color:var(--muted)}
+.note{color:var(--muted);font-size:.9rem}
+.box{background:var(--card);border-radius:14px;padding:16px}
+footer{text-align:center;color:var(--muted);padding:28px 18px;font-size:.9rem}
+.row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}.row .en{text-align:left;color:var(--muted);font-size:.92rem}.pr{display:flex;justify-content:center}.row{grid-template-columns:minmax(0,1fr) 128px minmax(0,1fr);gap:6px;line-height:1.35;min-height:44px}.row>span:first-child{text-align:right}.row .en{text-align:left;overflow-wrap:anywhere}.pr{width:128px}@media(max-width:480px){.row{grid-template-columns:minmax(0,1fr) 108px minmax(0,1fr);padding:8px 8px;font-size:.9rem}.pr{width:108px}.p{width:54px!important}.row .en{font-size:.8rem}}.bi{display:flex;justify-content:space-between;align-items:baseline}.pb{background:none;border:1px solid var(--gold);color:var(--gold);border-radius:8px;padding:4px 0;font:inherit;font-weight:700;cursor:pointer;transition:transform .12s}.pb::after{content:" +"}.pb:active{transform:scale(.9);background:var(--gold);color:#2a1414}
+#cartBtn{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:20;width:52px;height:52px;border-radius:50%;border:0;background:var(--gold);color:#2a1414;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+#cartBtn svg{width:28px;height:28px}#count{position:absolute;top:-4px;left:-4px;min-width:22px;height:22px;border-radius:11px;background:var(--red);color:#fff;font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.bump{animation:bump .4s}@keyframes bump{40%{transform:scale(1.3)}}
+.veil{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .25s;z-index:30}.veil.open{opacity:1;pointer-events:auto}
+aside{position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:#241010;color:var(--fg);z-index:40;transform:translateX(105%);transition:transform .3s;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}aside.open{transform:none}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #4a2a2a}.dh h2{margin:0}.x{background:none;border:0;color:var(--fg);font-size:1.7rem;cursor:pointer}
+#items{flex:1;overflow-y:auto;padding:10px 18px}.empty{color:var(--muted);text-align:center;margin-top:40px}
+.item{display:grid;grid-template-columns:52px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid #4a2a2a;animation:in .3s}@keyframes in{from{opacity:0;transform:translateX(-20px)}}
+.em{font-size:2rem;background:var(--card);border-radius:12px;display:flex;align-items:center;justify-content:center;height:52px}
+.item h4{margin:0}.item small{color:var(--muted)}
+.ctl{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}.ctl button{width:30px;height:30px;border-radius:8px;border:1px solid #6a3a3a;background:none;color:var(--fg);cursor:pointer;font-size:1.1rem}.ctl b{min-width:20px;text-align:center}.ctl .lt{color:var(--gold);margin-inline-start:auto}.ctl .rm{width:auto;padding:0 10px;font-size:.8rem;color:#ff7b7b;border-color:#ff7b7b}
+.sum{padding:16px 18px;border-top:1px solid #4a2a2a}.tot{display:flex;justify-content:space-between;font-size:1.2rem;font-weight:800;margin-bottom:12px;color:var(--gold)}
+.chk{width:100%;background:#25d366;color:#052e16;font-weight:800;border:0;border-radius:10px;padding:13px;font:inherit;font-weight:800;cursor:pointer}.chk:disabled{opacity:.4;cursor:not-allowed}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,120px);background:var(--gold);color:#2a1414;font-weight:700;padding:11px 20px;border-radius:999px;z-index:60;transition:transform .3s}#toast.show{transform:translate(-50%,0)}
+.fly{position:fixed;width:16px;height:16px;border-radius:50%;background:var(--gold);z-index:70;pointer-events:none}
+
+/* ---------- عناصر جديدة | New elements ---------- */
+.nm{display:flex;align-items:center;gap:8px}
+.thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;flex:none}
+.item .thumb{width:52px;height:52px;border-radius:12px}
+/* نموذج بيانات العميل | Customer form */
+.cust{padding:10px 18px 0;border-top:1px solid #4a2a2a}
+input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #6a3a3a;background:#1a0c0c;color:var(--fg);font:inherit;margin:4px 0 8px}
+.adm{color:var(--muted);text-decoration:none;opacity:.35;margin-inline-start:8px}
+/* لوحة الإدارة | Admin modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:80;display:none;justify-content:center;align-items:flex-start;overflow:auto;padding:20px}
+.modal.open{display:flex}
+.mbox{background:#241010;border-radius:14px;padding:18px;width:min(720px,100%)}
+.arow{display:flex;gap:8px;align-items:center;padding:8px;background:var(--card);border-radius:8px;margin-bottom:6px}
+.arow>span{flex:1}.arow small{color:var(--muted)}
+.sbtn{padding:7px 14px;border-radius:8px;border:1px solid var(--gold);background:none;color:var(--gold);cursor:pointer;font:inherit}
+.sbtn.del{color:#ff7b7b;border-color:#ff7b7b}
+.atools{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.aform{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px}
+.aform label{font-size:.85rem;color:var(--muted)}
+
+/* مسافة صغيرة بين أزرار الأسعار (Single / Double) | small gap between price buttons */
+.pr{gap:6px}
+@media(max-width:480px){.row{grid-template-columns:minmax(0,1fr) 116px minmax(0,1fr)}.pr{width:116px}.p{width:52px!important}}
