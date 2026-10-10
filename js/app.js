@@ -61,9 +61,9 @@ function lookup(k) {
 }
 const total = () => cart.reduce((s, c) => { const p = lookup(c.k); return s + (p ? p.price * c.qty : 0); }, 0);
 
-function toast(t) {
+function toast(t, ms) {
   const e = $('toast'); e.textContent = t; e.classList.add('show');
-  clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('show'), 1600);
+  clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('show'), ms || 1600);
 }
 
 function renderCart() {

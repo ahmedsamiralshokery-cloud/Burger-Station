@@ -1,7 +1,7 @@
 /* sw.js — Service Worker: يخلي الموقع يفتح حتى بدون نت | makes the site work offline
    الاستراتيجية: الشبكة أولاً ثم الكاش، فالتحديثات (مثل menu-data.js) تظهر فورًا وهو أونلاين
    Strategy: network first, fall back to cache */
-const CACHE = 'burger-station-v1';
+const CACHE = 'burger-station-v2';
 const FILES = ['./', 'index.html', 'css/style.css', 'js/menu-data.js', 'js/app.js', 'js/admin.js', 'js/pwa.js',
   'images/logo.jpg', 'images/burger-1.jpg', 'images/burger-2.jpg', 'icons/icon-192.png', 'icons/icon-512.png', 'manifest.webmanifest'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
