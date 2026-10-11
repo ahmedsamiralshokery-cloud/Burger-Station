@@ -34,7 +34,7 @@
   function panel(form) {
     const m = window.App.getMenu();
     // قائمة مناطق التوصيل | delivery areas list
-    const areaList = (m.areas || []).map(a => `<div class="arow"><span>${esc(a.ar)}<br><b>${esc(a.fee)} ج.م</b></span>
+    const areaList = [...(m.areas || [])].sort((x, y) => x.ar.replace(/^ال/, '').localeCompare(y.ar.replace(/^ال/, ''), 'ar')).map(a => `<div class="arow"><span>${esc(a.ar)}<br><b>${esc(a.fee)} ج.م</b></span>
       <button class="sbtn" data-a="editarea" data-id="${esc(a.id)}">تعديل</button><button class="sbtn del" data-a="delarea" data-id="${esc(a.id)}">حذف</button></div>`).join('');
     const list = m.categories.map(c => `<div class="hd">${esc(c.ar)} · ${esc(c.en)}</div>` +
       m.items.filter(i => i.cat === c.id).map(i =>
