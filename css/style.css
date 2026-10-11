@@ -69,3 +69,19 @@ input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid
 #installBtn{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:12px;z-index:20;width:52px;height:52px;border-radius:50%;border:2px solid var(--gold);padding:0;overflow:hidden;background:#0a0a0a;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4)}
 #installBtn img{width:100%;height:100%;display:block}
 #installBtn[hidden]{display:none}
+
+/* وصف الصنف تحت الاسم | item description under the name */
+.ds{display:block;color:var(--muted);font-size:.78rem;line-height:1.45;margin-top:2px;font-weight:400}
+
+/* صورة البرجر الرئيسية | main burger photo */
+.pics{grid-template-columns:1fr;justify-items:center}
+.pics img{height:auto;max-height:560px;width:auto;max-width:100%;object-fit:contain}
+
+/* ملخص السلة: إجمالي + توصيل + إجمالي كلي | cart summary lines */
+.line{display:flex;justify-content:space-between;margin-bottom:6px;color:var(--muted)}
+aside{overflow-y:auto}
+#items{flex:1 0 auto;min-height:140px;overflow-y:visible}
+.sum{position:sticky;bottom:0;background:#241010}
+
+.sbtn.pub{background:var(--gold);color:#2a1414;font-weight:700}
+.aform h3{margin:0 0 6px;color:var(--gold)}

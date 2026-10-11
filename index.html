@@ -36,8 +36,7 @@
 <main class="w">
   <!-- صور | Photos -->
   <div class="pics">
-    <img src="images/burger-1.jpg" alt="برجر">
-    <img src="images/burger-2.jpg" alt="تشيزي مشروم">
+    <img src="images/burger-main.jpg" alt="برجر Burger Station">
   </div>
 
   <!-- المنيو (يُرسم من app.js) | Menu (rendered by app.js) -->
@@ -74,10 +73,13 @@
   <div class="cust">
     <input id="custName" placeholder="الاسم (اختياري)" autocomplete="name">
     <input id="custPhone" type="tel" placeholder="رقم التليفون" autocomplete="tel">
-    <textarea id="custAddr" rows="2" placeholder="العنوان بالتفصيل"></textarea>
+    <select id="custArea" aria-label="المنطقة"></select>
+    <textarea id="custAddr" rows="2" placeholder="تفاصيل العنوان" hidden></textarea>
   </div>
   <div class="sum">
-    <div class="tot"><span>الإجمالي</span><span id="total">0</span></div>
+    <div class="line"><span>الإجمالي</span><span id="subtotal">0</span></div>
+    <div class="line"><span>🛵 التوصيل</span><span id="fee">—</span></div>
+    <div class="tot"><span>الإجمالي الكلي</span><span id="total">0</span></div>
     <button class="chk" id="checkout">إرسال الطلب</button>
   </div>
 </aside>

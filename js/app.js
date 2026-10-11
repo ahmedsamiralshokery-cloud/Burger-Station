@@ -9,7 +9,7 @@ const CONFIG = {
   whatsapp: '201006446834',  // رقم الواتساب بصيغة دولية بدون + | international format, no "+"
   currency: 'ج.م',
   menuKey: 'bs_menu',        // مفتاح حفظ المنيو المعدّل | edited-menu storage key
-  cartKey: 'bs_cart',        // مفتاح حفظ السلة | cart storage key
+  cartKey: 'bs_cart2',       // مفتاح حفظ السلة | cart storage key
   custKey: 'bs_customer'     // بيانات العميل | customer details key
 };
 
@@ -25,7 +25,8 @@ const clone = o => JSON.parse(JSON.stringify(o));
 /* ---------- 3) المنيو الديناميكي | Dynamic menu ---------- */
 // المنيو المحفوظ من لوحة الإدارة، وإلا الافتراضي من menu-data.js
 let menu = read(CONFIG.menuKey, null);
-if (!menu || !Array.isArray(menu.items) || !Array.isArray(menu.categories)) menu = clone(DEFAULT_MENU);
+if (!menu || !Array.isArray(menu.items) || !Array.isArray(menu.categories) || !(menu.version >= DEFAULT_MENU.version)) menu = clone(DEFAULT_MENU);
+if (!Array.isArray(menu.areas)) menu.areas = [];   // مناطق التوصيل | delivery areas
 let activeCat = menu.categories[0].id;
 
 function renderTabs() {
@@ -42,7 +43,7 @@ function renderMenu() {
     const btn = (k, p) => `<button class="p pb" data-add="${esc(k)}">${esc(p)}</button>`;
     const prices = (cat.sized && i.p2 != null) ? btn(i.id + '|s', i.p1) + btn(i.id + '|d', i.p2) : btn(i.id + '|s', i.p1);
     // عربي يمين | سعر وسط | إنجليزي شمال
-    return `<div class="row"><span class="nm">${img}<span>${esc(i.ar)}</span></span><span class="pr">${prices}</span><span class="en" dir="ltr">${esc(i.en)}</span></div>`;
+    return `<div class="row"><span class="nm">${img}<span>${esc(i.ar)}${i.desc ? `<small class="ds">${esc(i.desc)}</small>` : ''}</span></span><span class="pr">${prices}</span><span class="en" dir="ltr">${esc(i.en)}</span></div>`;
   }).join('');
   $('menu').innerHTML = head + (rows || '<p class="empty">لا توجد أصناف</p>');
 }
@@ -57,13 +58,44 @@ function lookup(k) {
   if (!it) return null;                       // الصنف اتحذف | item was deleted
   const cat = menu.categories.find(c => c.id === it.cat) || {};
   const dbl = sz === 'd' && it.p2 != null;
-  return { name: it.ar + (cat.sized ? (dbl ? ' (دبل)' : ' (سنجل)') : ''), price: Number(dbl ? it.p2 : it.p1), emoji: cat.emoji || '🍽️', img: it.img };
+  return { name: it.ar + (cat.sized && it.p2 != null ? (dbl ? ' (دبل)' : ' (سنجل)') : ''), price: Number(dbl ? it.p2 : it.p1), emoji: cat.emoji || '🍽️', img: it.img };
 }
 const total = () => cart.reduce((s, c) => { const p = lookup(c.k); return s + (p ? p.price * c.qty : 0); }, 0);
 
 function toast(t, ms) {
   const e = $('toast'); e.textContent = t; e.classList.add('show');
   clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('show'), ms || 1600);
+}
+
+/* ---------- مناطق التوصيل | Delivery areas ---------- */
+const OTHER = '__other';   // خيار "مدينة أخرى" | the "other city" option
+function renderAreas() {
+  const sel = $('custArea'), keep = sel.value || read(CONFIG.custKey, {}).area || '';
+  sel.innerHTML = '<option value="">اختر منطقتك 🛵</option>' +
+    menu.areas.map(a => `<option value="${esc(a.id)}">${esc(a.ar)} — ${ad(a.fee)} ${CONFIG.currency}</option>`).join('') +
+    `<option value="${OTHER}">مدينة أخرى</option>`;
+  sel.value = keep; if (sel.value !== keep) sel.value = '';
+  areaUI();
+}
+// معلومات المنطقة المختارة | info about the selected area: none / other / area
+function areaInfo() {
+  const v = $('custArea').value;
+  if (v === OTHER) return { mode: 'other', name: 'مدينة أخرى', fee: 0 };
+  const a = menu.areas.find(x => x.id === v);
+  return a ? { mode: 'area', name: a.ar, fee: Number(a.fee) } : { mode: 'none', name: '', fee: 0 };
+}
+// خانة العنوان تظهر بعد اختيار المنطقة (إجبارية لو "مدينة أخرى") | address box appears after choosing
+function areaUI() {
+  const m = areaInfo().mode, t = $('custAddr');
+  t.placeholder = m === 'other' ? 'اكتب عنوانك بالتفصيل (المدينة والشارع)' : 'تفاصيل العنوان: الشارع / رقم العمارة (اختياري)';
+  t.hidden = m === 'none';
+}
+// الإجمالي + التوصيل + الإجمالي الكلي | subtotal + delivery + grand total
+function updateTotals() {
+  const sub = total(), a = areaInfo();
+  $('subtotal').textContent = ad(sub) + ' ' + CONFIG.currency;
+  $('fee').textContent = a.mode === 'area' ? ad(a.fee) + ' ' + CONFIG.currency : a.mode === 'other' ? 'يُحدد حسب العنوان' : '—';
+  $('total').textContent = ad(sub + a.fee) + ' ' + CONFIG.currency;
 }
 
 function renderCart() {
@@ -76,7 +108,7 @@ function renderCart() {
       <div class="ctl"><button data-dec="${k}" aria-label="أقل">&minus;</button><b>${ad(c.qty)}</b><button data-inc="${k}" aria-label="أكثر">+</button>
       <b class="lt">${ad(p.price * c.qty)} ${CONFIG.currency}</b><button class="rm" data-rm="${k}">حذف</button></div></div></div>`;
   }).join('') : '<p class="empty">السلة فاضية</p>';
-  $('total').textContent = ad(total()) + ' ' + CONFIG.currency;
+  updateTotals();
   $('checkout').disabled = !cart.length;
   write(CONFIG.cartKey, cart);
 }
@@ -98,22 +130,28 @@ function fly(b) {   // حركة نقطة طايرة للسلة | flying dot anim
 function openCart(o) { $('drawer').classList.toggle('open', o); $('veil').classList.toggle('open', o); }
 
 /* ---------- 5) إرسال الطلب على واتساب | WhatsApp order ---------- */
-function buildMessage(cust) {
+function buildMessage(cust, area) {
   const lines = cart.map((c, i) => { const p = lookup(c.k); return `${ad(i + 1)}. ${p.name} × ${ad(c.qty)} = ${ad(p.price * c.qty)} ${CONFIG.currency}`; });
+  const sub = total(), grand = sub + area.fee;
+  const feeLine = area.mode === 'area' ? `🛵 التوصيل: ${ad(area.fee)} ${CONFIG.currency}` : '🛵 التوصيل: يُحدد حسب العنوان';
   return ['🍔 *طلب جديد - Burger Station*', '',
-    ...(cust.name ? [`👤 الاسم: ${cust.name}`] : []), `📞 الهاتف: ${ad(cust.phone)}`, `📍 العنوان: ${cust.addr}`, '',
+    ...(cust.name ? [`👤 الاسم: ${cust.name}`] : []),
+    `📞 الهاتف: ${ad(cust.phone)}`,
+    `📍 المنطقة: ${area.name}`,
+    ...(cust.addr ? [`🏠 العنوان: ${cust.addr}`] : []), '',
     '🧾 *تفاصيل الطلب:*', ...lines, '',
-    `💰 *الإجمالي: ${ad(total())} ${CONFIG.currency}*`].join('\n');
+    `🧮 الإجمالي: ${ad(sub)} ${CONFIG.currency}`,      // الإجمالي | subtotal
+    feeLine,                                            // تحته سعر التوصيل | delivery under it
+    `💰 *الإجمالي الكلي: ${ad(grand)} ${CONFIG.currency}*${area.mode === 'other' ? ' (بدون التوصيل)' : ''}`].join('\n');
 }
 
 function sendOrder() {
-  const cust = { name: $('custName').value.trim(), phone: $('custPhone').value.trim(), addr: $('custAddr').value.trim() };
   if (!cart.length) return;
-  if (!cust.phone || !cust.addr) {                          // الاسم اختياري | name is optional
-    toast('من فضلك اكتب التليفون والعنوان');
-    [$('custPhone'), $('custAddr')].find(el => !el.value.trim()).focus(); return;
-  }
-  const url = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(buildMessage(cust))}`;
+  const cust = { name: $('custName').value.trim(), phone: $('custPhone').value.trim(), addr: $('custAddr').value.trim() }, area = areaInfo();
+  if (!cust.phone) { toast('من فضلك اكتب رقم التليفون'); $('custPhone').focus(); return; }
+  if (area.mode === 'none') { toast('من فضلك اختار منطقتك'); $('custArea').focus(); return; }
+  if (area.mode === 'other' && !cust.addr) { toast('من فضلك اكتب عنوانك'); $('custAddr').focus(); return; }
+  const url = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(buildMessage(cust, area))}`;
   if (!window.open(url, '_blank')) location.href = url;     // لو المتصفح منع النافذة | popup-blocked fallback
 }
 
@@ -133,10 +171,9 @@ $('close').onclick = $('veil').onclick = () => openCart(false);
 $('checkout').onclick = sendOrder;
 // حفظ بيانات العميل أثناء الكتابة | remember customer details
 const cust0 = read(CONFIG.custKey, {});
-[['custName', 'name'], ['custPhone', 'phone'], ['custAddr', 'addr']].forEach(([id, f]) => {
-  $(id).value = cust0[f] || '';
-  $(id).oninput = () => write(CONFIG.custKey, { name: $('custName').value, phone: $('custPhone').value, addr: $('custAddr').value });
-});
+const saveCust = () => write(CONFIG.custKey, { name: $('custName').value, phone: $('custPhone').value, addr: $('custAddr').value, area: $('custArea').value });
+[['custName', 'name'], ['custPhone', 'phone'], ['custAddr', 'addr']].forEach(([id, f]) => { $(id).value = cust0[f] || ''; $(id).oninput = saveCust; });
+$('custArea').onchange = () => { saveCust(); areaUI(); updateTotals(); };
 
 /* ---------- 7) واجهة للوحة الإدارة | API for admin.js ---------- */
 window.App = {
@@ -145,10 +182,10 @@ window.App = {
     if (!write(CONFIG.menuKey, m)) return false;  // المساحة ممتلئة؟ | storage full?
     menu = clone(m);
     if (!menu.categories.some(c => c.id === activeCat)) activeCat = menu.categories[0].id;
-    renderTabs(); renderMenu(); renderCart(); return true;
+    renderTabs(); renderMenu(); renderAreas(); renderCart(); return true;
   },
-  resetMenu() { try { localStorage.removeItem(CONFIG.menuKey); } catch (e) {} menu = clone(DEFAULT_MENU); activeCat = menu.categories[0].id; renderTabs(); renderMenu(); renderCart(); },
+  resetMenu() { try { localStorage.removeItem(CONFIG.menuKey); } catch (e) {} menu = clone(DEFAULT_MENU); activeCat = menu.categories[0].id; renderTabs(); renderMenu(); renderAreas(); renderCart(); },
   toast
 };
 
-renderTabs(); renderMenu(); renderCart();
+renderTabs(); renderMenu(); renderAreas(); renderCart();
