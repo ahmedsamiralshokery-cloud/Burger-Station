@@ -68,12 +68,12 @@ function toast(t, ms) {
 }
 
 /* ---------- مناطق التوصيل | Delivery areas ---------- */
-const OTHER = '__other';   // خيار "مدينة أخرى" | the "other city" option
+const OTHER = '__other';   // خيار "منطقة أخرى" | the "other city" option
 function renderAreas() {
   const sel = $('custArea'), keep = sel.value || read(CONFIG.custKey, {}).area || '';
   sel.innerHTML = '<option value="">اختر منطقتك 🛵</option>' +
     menu.areas.map(a => `<option value="${esc(a.id)}">${esc(a.ar)} — ${ad(a.fee)} ${CONFIG.currency}</option>`).join('') +
-    `<option value="${OTHER}">مدينة أخرى</option>`;
+    `<option value="${OTHER}">منطقة أخرى</option>`;
   sel.value = keep; if (sel.value !== keep) sel.value = '';
   areaUI();
 }
