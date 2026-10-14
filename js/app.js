@@ -10,6 +10,7 @@ const CONFIG = {
   currency: 'ج.م',
   menuKey: 'bs_menu',        // مفتاح حفظ المنيو المعدّل | edited-menu storage key
   cartKey: 'bs_cart2',       // مفتاح حفظ السلة | cart storage key
+  burgerChoices: ['بيف', 'تشكن'],   // اختيارات بوكس برجر ستيشن | choices for the Burger Station box
   custKey: 'bs_customer'     // بيانات العميل | customer details key
 };
 
@@ -53,12 +54,12 @@ let cart = read(CONFIG.cartKey, []);   // [{k:'id|s', qty}]
 
 // يحوّل مفتاح السلة إلى بيانات الصنف الحالية (الاسم/السعر) | resolves a cart key to live item data
 function lookup(k) {
-  const [id, sz] = k.split('|');
+  const [id, sz, ch] = k.split('|');   // ch = اختيار العميل (بيف/تشكن) | customer's choice
   const it = menu.items.find(i => i.id === id);
   if (!it) return null;                       // الصنف اتحذف | item was deleted
   const cat = menu.categories.find(c => c.id === it.cat) || {};
   const dbl = sz === 'd' && it.p2 != null;
-  return { name: it.ar + (cat.sized && it.p2 != null ? (dbl ? ' (دبل)' : ' (سنجل)') : ''), price: Number(dbl ? it.p2 : it.p1), emoji: cat.emoji || '🍽️', img: it.img };
+  return { name: it.ar + (cat.sized && it.p2 != null ? (dbl ? ' (دبل)' : ' (سنجل)') : '') + (ch ? ' (' + ch + ')' : ''), price: Number(dbl ? it.p2 : it.p1), emoji: cat.emoji || '🍽️', img: it.img };
 }
 const total = () => cart.reduce((s, c) => { const p = lookup(c.k); return s + (p ? p.price * c.qty : 0); }, 0);
 
@@ -68,13 +69,14 @@ function toast(t, ms) {
 }
 
 /* ---------- مناطق التوصيل | Delivery areas ---------- */
+// ترتيب أبجدي عربي (بنتجاهل "ال" التعريف) | Arabic alphabetical order, ignoring the leading "ال"
 const sortAreas = list => [...list].sort((x, y) => x.ar.replace(/^ال/, '').localeCompare(y.ar.replace(/^ال/, ''), 'ar'));
-const OTHER = '__other';   // خيار "منطقة أخرى" | the "other city" option
+const OTHER = '__other';   // خيار "مدينة أخرى" | the "other city" option
 function renderAreas() {
   const sel = $('custArea'), keep = sel.value || read(CONFIG.custKey, {}).area || '';
   sel.innerHTML = '<option value="">اختر منطقتك 🛵</option>' +
     sortAreas(menu.areas).map(a => `<option value="${esc(a.id)}">${esc(a.ar)} — ${ad(a.fee)} ${CONFIG.currency}</option>`).join('') +
-    `<option value="${OTHER}">منطقة أخرى</option>`;
+    `<option value="${OTHER}">مدينة أخرى</option>`;
   sel.value = keep; if (sel.value !== keep) sel.value = '';
   areaUI();
 }
@@ -111,6 +113,7 @@ function renderCart() {
   }).join('') : '<p class="empty">السلة فاضية</p>';
   updateTotals();
   $('checkout').disabled = !cart.length;
+  const cb = document.getElementById('clearCart'); if (cb) cb.hidden = !cart.length;   // زرار حذف الأوردر | clear-order button
   write(CONFIG.cartKey, cart);
 }
 
@@ -158,7 +161,13 @@ function sendOrder() {
 
 /* ---------- 6) الأحداث | Events ---------- */
 $('tabs').onclick = e => { const b = e.target.closest('[data-cat]'); if (b) { activeCat = b.dataset.cat; renderTabs(); renderMenu(); } };
-$('menu').onclick = e => { const b = e.target.closest('[data-add]'); if (b) addToCart(b.dataset.add, b); };
+// أصناف بتطلب اختيار (بوكس برجر ستيشن: بيف أو تشكن) | items that need a choice first
+const choicesFor = it => it.options || (it.cat === 'boxes' && /برجر\s*[اإ]?ستيشن/.test(it.ar) ? CONFIG.burgerChoices : null);
+$('menu').onclick = e => {
+  const b = e.target.closest('[data-add]'); if (!b) return;
+  const k = b.dataset.add, it = menu.items.find(i => i.id === k.split('|')[0]), opts = it && choicesFor(it);
+  opts ? askChoice(it.ar, opts, c => addToCart(k + '|' + c, b)) : addToCart(k, b);
+};
 $('items').onclick = e => {
   const t = e.target.closest('button'); if (!t) return;
   const d = t.dataset, k = d.inc || d.dec || d.rm, c = cart.find(x => x.k === k); if (!c) return;
@@ -176,6 +185,33 @@ const saveCust = () => write(CONFIG.custKey, { name: $('custName').value, phone:
 [['custName', 'name'], ['custPhone', 'phone'], ['custAddr', 'addr']].forEach(([id, f]) => { $(id).value = cust0[f] || ''; $(id).oninput = saveCust; });
 $('custArea').onchange = () => { saveCust(); areaUI(); updateTotals(); };
 
+/* ---------- نافذة اختيار النوع (بيف / تشكن) | Choice popup ---------- */
+const EMOJI = { 'بيف': '🥩', 'تشكن': '🍗' };
+function askChoice(title, opts, done) {
+  const v = document.createElement('div'); v.className = 'chv';
+  v.innerHTML = `<div class="chb"><h3>${esc(title)}</h3><p>اختار النوع</p>${opts.map(o => `<button data-c="${esc(o)}">${EMOJI[o] || ''} ${esc(o)}</button>`).join('')}<button class="chx" data-c="">إلغاء</button></div>`;
+  v.onclick = e => { const t = e.target.closest('[data-c]'); if (!t && e.target !== v) return; v.remove(); if (t && t.dataset.c) done(t.dataset.c); };
+  document.body.appendChild(v);
+}
+
+/* ---------- زرار حذف الأوردر والبدء من جديد | Clear order button ---------- */
+const clr = document.createElement('button');
+clr.id = 'clearCart'; clr.className = 'clr'; clr.textContent = '🗑️ حذف الأوردر والبدء من جديد';
+$('items').after(clr);
+clr.onclick = () => { if (confirm('تحذف الأوردر كله وتبدأ من جديد؟')) { cart = []; renderCart(); toast('تم حذف الأوردر ✓'); } };
+
+// تنسيق العناصر الجديدة (محقون من هنا عشان نعدل ملف واحد بس) | styles injected here so only app.js changes
+const st = document.createElement('style');
+st.textContent = `.chv{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:90;display:flex;align-items:center;justify-content:center;padding:20px}
+.chb{background:#241010;color:var(--fg);border-radius:16px;padding:20px;width:min(340px,100%);text-align:center}
+.chb h3{margin:0;color:var(--gold)}.chb p{color:var(--muted);margin:4px 0 14px}
+.chb button{display:block;width:100%;padding:14px;margin-bottom:10px;border-radius:12px;border:2px solid var(--gold);background:none;color:var(--gold);font:inherit;font-size:1.1rem;font-weight:700;cursor:pointer}
+.chb button:active{background:var(--gold);color:#2a1414}
+.chb .chx{border-color:#6a3a3a;color:var(--muted);font-size:.95rem;font-weight:400}
+.clr{display:block;margin:8px 18px 0;width:calc(100% - 36px);padding:10px;border-radius:10px;border:1px solid #ff7b7b;background:none;color:#ff7b7b;font:inherit;cursor:pointer}
+.clr[hidden]{display:none}`;
+document.head.appendChild(st);
+
 /* ---------- 7) واجهة للوحة الإدارة | API for admin.js ---------- */
 window.App = {
   $, esc, getMenu: () => clone(menu),
@@ -186,7 +222,7 @@ window.App = {
     renderTabs(); renderMenu(); renderAreas(); renderCart(); return true;
   },
   resetMenu() { try { localStorage.removeItem(CONFIG.menuKey); } catch (e) {} menu = clone(DEFAULT_MENU); activeCat = menu.categories[0].id; renderTabs(); renderMenu(); renderAreas(); renderCart(); },
-  toast
+  toast, sortAreas
 };
 
 renderTabs(); renderMenu(); renderAreas(); renderCart();
